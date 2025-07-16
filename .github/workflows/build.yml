@@ -57,14 +57,15 @@ jobs:
           mkdir -p /tmp/gitops-pusher-build
           cd /tmp/gitops-pusher-build
           
-          # Initialize a new Go module
+          # Initialize a new Go module and enable module mode
           go mod init temp-build
+          go env -w GO111MODULE=on
           
           # Install the specific version of gitops-pusher
-          go install "tailscale.com/cmd/gitops-pusher@${COMMIT_HASH}"
+          GOBIN="${GITHUB_WORKSPACE}" go install "tailscale.com/cmd/gitops-pusher@${COMMIT_HASH}"
           
-          # Copy the binary to our workspace with the correct name
-          cp "$(go env GOPATH)/bin/gitops-pusher" "${GITHUB_WORKSPACE}/${BINARY_NAME}"
+          # Rename the binary to include platform info
+          mv "${GITHUB_WORKSPACE}/gitops-pusher" "${GITHUB_WORKSPACE}/${BINARY_NAME}"
           
           # Make executable (for non-Windows)
           if [ "${{ matrix.goos }}" != "windows" ]; then

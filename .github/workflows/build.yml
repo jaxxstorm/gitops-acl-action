@@ -4,6 +4,16 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      gitops_pusher_commit:
+        description: 'Tailscale gitops-pusher commit hash'
+        required: true
+        default: '66aa77416744037baec93206ae212012a2314f83'
+      tag_name:
+        description: 'Release tag name'
+        required: true
+        default: 'v1.0.0'
 
 jobs:
   build:

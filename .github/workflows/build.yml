@@ -20,11 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64]
-        exclude:
-          - goos: windows
-            goarch: arm64
+        goos: [linux]
+        goarch: [amd64]
     
     steps:
       - name: Set up Go
@@ -55,13 +52,23 @@ jobs:
           fi
           
           echo "Building for ${{ matrix.goos }}/${{ matrix.goarch }}"
-          go build -o "${BINARY_NAME}" \
-            -ldflags="-s -w" \
-            "tailscale.com/cmd/gitops-pusher@${COMMIT_HASH}"
+          
+          # Create a temporary directory for the build
+          mkdir -p /tmp/gitops-pusher-build
+          cd /tmp/gitops-pusher-build
+          
+          # Initialize a new Go module
+          go mod init temp-build
+          
+          # Install the specific version of gitops-pusher
+          go install "tailscale.com/cmd/gitops-pusher@${COMMIT_HASH}"
+          
+          # Copy the binary to our workspace with the correct name
+          cp "$(go env GOPATH)/bin/gitops-pusher" "${GITHUB_WORKSPACE}/${BINARY_NAME}"
           
           # Make executable (for non-Windows)
           if [ "${{ matrix.goos }}" != "windows" ]; then
-            chmod +x "${BINARY_NAME}"
+            chmod +x "${GITHUB_WORKSPACE}/${BINARY_NAME}"
           fi
           
           echo "BINARY_NAME=${BINARY_NAME}" >> $GITHUB_ENV

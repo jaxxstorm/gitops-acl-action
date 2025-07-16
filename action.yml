@@ -47,6 +47,7 @@ runs:
         binaries-location: binaries
         rename-to: gitops-pusher
         chmod: 0755
+        file: gitops-pusher-linux-amd64
     - name: Run gitops-pusher
       shell: bash
       env:
